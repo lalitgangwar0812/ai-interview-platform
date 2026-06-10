@@ -1,9 +1,10 @@
 package com.lalit.aiinterviewplatform.service;
 
-import com.lalit.aiinterviewplatform.dto.LoginRequest;
-import com.lalit.aiinterviewplatform.dto.LoginResponse;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.lalit.aiinterviewplatform.dto.LoginRequest;
+import com.lalit.aiinterviewplatform.dto.LoginResponse;
 import com.lalit.aiinterviewplatform.dto.RegisterRequest;
 import com.lalit.aiinterviewplatform.entity.User;
 import com.lalit.aiinterviewplatform.repository.UserRepository;
@@ -30,38 +31,47 @@ public class AuthService {
     private final UserRepository userRepository;
 
     /*
+     * BCrypt Password Encoder
+     *
+     * Used to hash passwords before storing
+     * them in the database and verify passwords
+     * during login.
+     */
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    /*
      * Constructor Injection
      *
-     * Spring automatically provides an instance
-     * of UserRepository when creating AuthService.
-     *
-     * This is the recommended dependency injection
-     * approach in Spring Boot.
+     * Spring automatically provides the required
+     * dependencies when creating AuthService.
      */
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository,
+                       BCryptPasswordEncoder passwordEncoder) {
+
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /*
      * Registers a new user.
      *
      * Flow:
-     * Check email
+     * Check Email
      * ↓
      * Create User
      * ↓
+     * Hash Password
+     * ↓
      * Save User
      */
-    public void registerUser(RegisterRequest request) 
-    {
+    public void registerUser(RegisterRequest request) {
 
-        //Check whether the email already exists
-        if(userRepository.existsByEmail(request.getEmail()))
+        // Check whether the email already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
 
-            {
-                // Stop registration if eamil already exists
-                throw new RuntimeException("Email already registered");
-            }
+            // Stop registration if email already exists
+            throw new RuntimeException("Email already registered");
+        }
 
         // Create a new User object
         User user = new User();
@@ -69,7 +79,10 @@ public class AuthService {
         // Copy data from DTO to Entity
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+
+        // Store BCrypt hash instead of plain password
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword()));
 
         // Every newly registered user gets USER role
         user.setRole("USER");
@@ -77,7 +90,8 @@ public class AuthService {
         // Save user into PostgreSQL
         userRepository.save(user);
     }
-        /*
+
+    /*
      * Logs in an existing user.
      *
      * Flow:
@@ -97,8 +111,11 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Check password
-        if (!user.getPassword().equals(request.getPassword())) {
+        // Verify password against BCrypt hash
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
             throw new RuntimeException("Invalid email or password");
         }
 
