@@ -4,25 +4,20 @@ package com.lalit.aiinterviewplatform.dto;
  * Login Response DTO
  *
  * Purpose:
- * Sends login result back to the client.
+ * Sends JWT token back to the client
+ * after successful login.
  *
  * This DTO is NOT a database table.
  */
 public class LoginResponse {
 
     /*
-     * Response message.
-     *
-     * Examples:
-     * Login successful
-     * Invalid email or password
+     * JWT Token.
      */
-    private String message;
+    private String token;
 
     /*
      * No-Argument Constructor
-     *
-     * Required by Spring when creating objects.
      */
     public LoginResponse() {
 
@@ -30,18 +25,16 @@ public class LoginResponse {
 
     /*
      * Parameterized Constructor
-     *
-     * Allows message assignment while creating object.
      */
-    public LoginResponse(String message) {
-        this.message = message;
+    public LoginResponse(String token) {
+        this.token = token;
     }
 
-    public String getMessage() {
-        return message;
+    public String getToken() {
+        return token;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -8,6 +8,7 @@ import com.lalit.aiinterviewplatform.dto.LoginResponse;
 import com.lalit.aiinterviewplatform.dto.RegisterRequest;
 import com.lalit.aiinterviewplatform.entity.User;
 import com.lalit.aiinterviewplatform.repository.UserRepository;
+import com.lalit.aiinterviewplatform.security.JwtUtil;
 
 /*
  * Authentication Service
@@ -19,7 +20,7 @@ import com.lalit.aiinterviewplatform.repository.UserRepository;
  * - User Registration
  * - User Login
  * - Password Validation
- * - JWT Generation (later)
+ * - JWT Generation
  */
 @Service
 public class AuthService {
@@ -40,16 +41,26 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     /*
+     * JWT Utility
+     *
+     * Used to generate JWT tokens after
+     * successful login.
+     */
+    private final JwtUtil jwtUtil;
+
+    /*
      * Constructor Injection
      *
      * Spring automatically provides the required
      * dependencies when creating AuthService.
      */
     public AuthService(UserRepository userRepository,
-                       BCryptPasswordEncoder passwordEncoder) {
+                       BCryptPasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     /*
@@ -99,7 +110,9 @@ public class AuthService {
      * ↓
      * Verify Password
      * ↓
-     * Return Response
+     * Generate JWT
+     * ↓
+     * Return Token
      */
     public LoginResponse loginUser(LoginRequest request) {
 
@@ -119,7 +132,10 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        // Return success response
-        return new LoginResponse("Login successful");
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        // Return token
+        return new LoginResponse(token);
     }
 }
