@@ -1,7 +1,7 @@
 package com.lalit.aiinterviewplatform.service;
 
-import javax.management.RuntimeErrorException;
-
+import com.lalit.aiinterviewplatform.dto.LoginRequest;
+import com.lalit.aiinterviewplatform.dto.LoginResponse;
 import org.springframework.stereotype.Service;
 
 import com.lalit.aiinterviewplatform.dto.RegisterRequest;
@@ -76,5 +76,33 @@ public class AuthService {
 
         // Save user into PostgreSQL
         userRepository.save(user);
+    }
+        /*
+     * Logs in an existing user.
+     *
+     * Flow:
+     * Find User
+     * ↓
+     * Verify Password
+     * ↓
+     * Return Response
+     */
+    public LoginResponse loginUser(LoginRequest request) {
+
+        // Find user by email
+        User user = userRepository.findByEmail(request.getEmail());
+
+        // Check whether user exists
+        if (user == null) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        // Check password
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        // Return success response
+        return new LoginResponse("Login successful");
     }
 }

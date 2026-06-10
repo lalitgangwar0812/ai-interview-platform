@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lalit.aiinterviewplatform.dto.LoginRequest;
+import com.lalit.aiinterviewplatform.dto.LoginResponse;
 import com.lalit.aiinterviewplatform.dto.RegisterRequest;
 import com.lalit.aiinterviewplatform.service.AuthService;
 
@@ -54,6 +56,22 @@ public class AuthController {
 
         // Simple success response
         return "User registered successfully";
+    }
+
+        /*
+     * Login API
+     *
+     * Endpoint:
+     * POST /api/auth/login
+     *
+     * Receives login data from the client
+     * and passes it to AuthService.
+     */
+    @PostMapping("/login")
+    public LoginResponse loginUser(@RequestBody LoginRequest request) {
+
+        // Call service layer to validate login
+        return authService.loginUser(request);
     }
 
 }
